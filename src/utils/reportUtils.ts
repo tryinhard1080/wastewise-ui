@@ -1,0 +1,167 @@
+import { ComparisonRecord } from "types";
+
+/**
+ * Generates an HTML string representing the comparison report.
+ * @param record - The comparison record data.
+ * @returns An HTML string.
+ */
+export function generateComparisonHtml(record: ComparisonRecord): string {
+  const comparisonDate = record.created_at
+    ? new Date(record.created_at).toLocaleDateString()
+    : "Unknown";
+
+  const file1 = record.file1_name || "Contract A";
+  const file2 = record.file2_name || "Contract B";
+
+  const summary = record.comparison_summary || "No summary available.";
+  // Ensure red_flags is treated as an array
+  const redFlagsArray = Array.isArray(record.red_flags) ? record.red_flags : (record.red_flags ? [record.red_flags] : []);
+  
+  const redFlagsHtml = redFlagsArray.length
+    ? redFlagsArray.map((flag) => `<li class="red-flag">${flag}</li>`).join("") // Added class for styling
+    : "<li>No red flags identified.</li>";
+
+  // Placeholder Base64 encoded image data (truncated for brevity)
+  const wastewiseLogo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAADKu2NhQlgAAMq7anVtYgAAAB5qdW1kYz"; 
+  const chatbotLogo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAADs0mNhQlgAAOzSanVtYgAAAB5qdW1kYz";
+
+  // Hardcoded metadata example - replace with dynamic data later if needed
+  const metadataHtml = `
+    <tr>
+      <td>Termination Notice</td>
+      <td>90 Days</td> 
+      <td>30 Days</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>01/01/2025</td>
+      <td>03/01/2025</td>
+    </tr>
+    <tr>
+      <td>Auto-Renewal</td>
+      <td>Yes (12 months)</td>
+      <td>No</td>
+    </tr>
+  `;
+
+  return `
+  <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 2rem; /* Increased padding */
+          color: #111827;
+          font-size: 12px; /* Base font size */
+        }
+        h1 {
+          font-size: 1.8rem; /* Larger heading */
+          font-weight: bold;
+          margin-bottom: 1rem;
+        }
+        h2 {
+          font-size: 1.2rem; /* Slightly larger subheading */
+          margin-top: 2rem;
+          margin-bottom: 0.5rem;
+          border-bottom: 1px solid #e5e7eb; /* Add underline to H2 */
+          padding-bottom: 0.3rem;
+        }
+        .card {
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          padding: 1rem;
+          margin-top: 1rem;
+          background-color: #f9fafb;
+        }
+        .red-flag {
+          background-color: #fef2f2; /* Light red background for flags */
+          padding: 0.5rem;
+          border-radius: 4px;
+          margin-bottom: 0.25rem;
+          border-left: 3px solid #f87171; /* Red left border */
+          list-style-type: none; /* Remove default bullet */
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1rem;
+        }
+        th, td {
+          padding: 0.5rem;
+          border: 1px solid #e5e7eb;
+          text-align: left; /* Ensure text aligns left */
+          vertical-align: top; /* Align content to top */
+        }
+        th {
+          background-color: #f3f4f6;
+          font-weight: bold;
+        }
+        ul {
+          padding-left: 0; /* Remove default padding for lists */
+        }
+        .footer {
+          margin-top: 3rem;
+          font-size: 0.85rem;
+          color: #6b7280;
+          text-align: center; /* Center footer text */
+          border-top: 1px solid #e5e7eb;
+          padding-top: 1rem;
+        }
+      </style>
+    </head>
+    <body>
+      <!-- Header with WasteWise logo -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h1>WasteWise Contract Comparison Report</h1>
+        <img src="${wastewiseLogo}" alt="WasteWise Logo" style="height: 40px;" />
+      </div>
+
+      <!-- Basic Info -->
+      <div class="card">
+        <strong>Comparison Date:</strong> ${comparisonDate}<br/>
+        <strong>File 1:</strong> ${file1}<br/>
+        ${file2 ? `<strong>File 2:</strong> ${file2}<br/>` : ''} <!-- Conditionally show File 2 -->
+      </div>
+
+      <!-- Metadata Comparison -->
+      <h2>Contract Overview</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>${file1}</th>
+            ${file2 ? `<th>${file2}</th>` : ''} <!-- Conditionally show File 2 header -->
+          </tr>
+        </thead>
+        <tbody>
+          ${metadataHtml} <!-- Using the hardcoded example rows -->
+        </tbody>
+      </table>
+
+      <!-- Summary -->
+      ${summary ? `
+        <div class="card">
+          <h2>Comparison Summary</h2>
+          <p>${summary}</p>
+        </div>
+      ` : ''}
+
+      <!-- Red Flags -->
+      <div class="card">
+        <h2>Identified Red Flags</h2>
+        <ul style="padding-left: 0;">${redFlagsHtml}</ul>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        Report generated by WasteWise on ${comparisonDate}<br/>
+        Reviewed by: Richard Bates, Director of Waste & Diversion Strategies, Greystar<br/>
+        <em>For internal use only. Do not distribute externally without approval.</em>
+        <div style="margin-top: 1rem;">
+          <img src="${chatbotLogo}" alt="AI Assistant Icon" style="height: 30px;" />
+        </div>
+      </div>
+    </body>
+  </html>
+  `;
+}
